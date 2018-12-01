@@ -131,8 +131,8 @@ class ImageOptimizer {
 			$iterator = new \RecursiveIteratorIterator( $iterator );
 			$iterator = new \RegexIterator( $iterator, '/^.+\.(jpe?g|png|gif|svg)$/i', \RecursiveRegexIterator::MATCH );
 
-			foreach ( $iterator as $path ) {
-				$result[] = $path[0];
+			foreach ( $iterator as $info ) {
+				$result[] = $info->getPathname();
 			}
 
 			unset( $iterator );
