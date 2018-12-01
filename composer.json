@@ -1,0 +1,29 @@
+{
+    "name": "kaleidpixel/image-optimizer",
+    "description": "Easily optimize images using PHP.",
+    "license": "GPL-2.0+",
+    "version": "0.1.0",
+    "homepage": "https://github.com/kaleidpixel/image-optimizer",
+    "type": "library",
+    "authors": [
+        {
+            "name": "KUCKLU",
+            "email": "oss@kaleidpixel.jp",
+            "homepage": "https://kuck1u.me",
+            "role": "Developer"
+        }
+    ],
+    "keywords": [
+        "kaleidpixel",
+        "image-optimizer"
+    ],
+    "require": {
+        "php": ">=5.6",
+        "enshrined/svg-sanitize": "0.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "KALEIDPIXEL\\Module\\": "src"
+        }
+    }
+}
