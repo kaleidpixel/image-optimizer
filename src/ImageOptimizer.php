@@ -6,7 +6,7 @@
  * @author     KUCKLU <hello@kuck1u.me>
  * @copyright  2018 Kaleid Pixel
  * @license    GNU General Public License v2.0 or later version
- * @version    0.1.0
+ * @version    0.1.2
  **/
 
 namespace KALEIDPIXEL\Module;
@@ -76,6 +76,8 @@ class ImageOptimizer {
 	 * @return string
 	 */
 	public function get_mime_type( $path ) {
+		set_time_limit( 0 );
+
 		return mime_content_type( $path );
 	}
 
@@ -92,8 +94,6 @@ class ImageOptimizer {
 	 * Optimize all images.
 	 */
 	public function doing( $mode = '' ) {
-		$ttl = ini_get( 'max_execution_time' );
-
 		set_time_limit( 0 );
 
 		switch ( $mode ) {
@@ -113,8 +113,6 @@ class ImageOptimizer {
 				unset( $images[ $k ] );
 			}
 		}
-
-		set_time_limit( $ttl );
 	}
 
 	/**
@@ -123,6 +121,8 @@ class ImageOptimizer {
 	 * @return array
 	 */
 	public function get_file_list() {
+		set_time_limit( 0 );
+
 		$result          = array();
 		$this->image_dir = self::_add_trailing_slash( $this->image_dir );
 
@@ -149,6 +149,8 @@ class ImageOptimizer {
 	 * @return array
 	 */
 	public function get_file_list_in_glob( $dir = '' ) {
+		set_time_limit( 0 );
+
 		$result = array();
 		$dir    = ( empty( $dir ) ) ? $this->image_dir : $dir;
 		$dir    = self::_delete_trailing_slash( $dir );
@@ -185,6 +187,8 @@ class ImageOptimizer {
 	 * @param string $file
 	 */
 	public function optimize( $file ) {
+		set_time_limit( 0 );
+
 		switch ( self::get_mime_type( $file ) ) {
 			case 'image/jpeg':
 				$command = self::get_binary_path( 'jpegtran' );
@@ -224,6 +228,8 @@ class ImageOptimizer {
 	 * @param string $file
 	 */
 	public function convert_to_webp( $file ) {
+		set_time_limit( 0 );
+
 		switch ( self::get_mime_type( $file ) ) {
 			case 'image/jpeg':
 			case 'image/png':
@@ -256,6 +262,8 @@ class ImageOptimizer {
 	 * @return string
 	 */
 	public function get_binary_path( $bin ) {
+		set_time_limit( 0 );
+
 		$os_dir            = '';
 		$ext               = '';
 		$this->command_dir = self::_delete_trailing_slash( $this->command_dir );

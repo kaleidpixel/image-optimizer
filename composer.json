@@ -2,14 +2,14 @@
     "name": "kaleidpixel/image-optimizer",
     "description": "Easily optimize images using PHP.",
     "license": "GPL-2.0+",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "homepage": "https://github.com/kaleidpixel/image-optimizer",
     "type": "library",
     "authors": [
         {
             "name": "KUCKLU",
             "email": "oss@kaleidpixel.jp",
-            "homepage": "https://kuck1u.me",
+            "homepage": "https://www.kaleidpixel.jp",
             "role": "Developer"
         }
     ],
