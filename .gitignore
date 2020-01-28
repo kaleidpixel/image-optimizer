@@ -103,4 +103,3 @@ jspm_packages/
 .sass-cache/
 cache/
 vendor/
-composer.lock
