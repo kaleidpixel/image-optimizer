@@ -6,7 +6,7 @@
  * @author     KUCKLU <hello@kuck1u.me>
  * @copyright  2018 Kaleid Pixel
  * @license    GNU General Public License v2.0 or later version
- * @version    0.1.2
+ * @version    0.1.4
  **/
 
 namespace KALEIDPIXEL\Module;
@@ -118,25 +118,29 @@ class ImageOptimizer {
 	/**
 	 * Create list of all image files in a specific directory.
 	 *
-	 * @return array
+	 * @return bool|array
 	 */
 	public function get_file_list() {
 		set_time_limit( 0 );
 
-		$result          = array();
 		$this->image_dir = self::_add_trailing_slash( $this->image_dir );
 
 		if ( is_dir( $this->image_dir ) ) {
+            $result   = array();
 			$iterator = new \RecursiveDirectoryIterator( $this->image_dir, \FileSystemIterator::SKIP_DOTS );
 			$iterator = new \RecursiveIteratorIterator( $iterator );
 			$iterator = new \RegexIterator( $iterator, '/^.+\.(jpe?g|png|gif|svg)$/i', \RecursiveRegexIterator::MATCH );
 
 			foreach ( $iterator as $info ) {
-				$result[] = $info->getPathname();
+			    if ( $info->isFile() ) {
+                    $result[] = $info->getPathname();
+                }
 			}
 
 			unset( $iterator );
-		}
+		} else {
+            $result = false;
+        }
 
 		return $result;
 	}
