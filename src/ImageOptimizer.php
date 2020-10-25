@@ -156,7 +156,7 @@ class ImageOptimizer {
 		$dir    = self::_delete_trailing_slash( $dir );
 
 		if ( is_dir( $dir ) ) {
-			$files = glob( "{$dir}/*", GLOB_BRACE );
+			$files = glob(  $dir . DIRECTORY_SEPARATOR . "*", GLOB_BRACE );
 
 			foreach ( $files as $v ) {
 				if ( is_file( $v ) ) {
@@ -193,17 +193,17 @@ class ImageOptimizer {
 			case 'image/jpeg':
 				$command = self::get_binary_path( 'jpegtran' );
 
-				exec( "{$command} -progressive -copy none -optimize -outfile '{$file}' '{$file}' 2>&1", $result );
+				exec( "{$command} -progressive -copy none -optimize -outfile {$file} {$file} 2>&1", $result );
 				break;
 			case 'image/png':
 				$command = self::get_binary_path( 'pngquant' );
 
-				exec( "{$command} --force --output '{$file}' '{$file}' 2>&1", $result );
+				exec( "{$command} --force --output {$file} {$file} 2>&1", $result );
 				break;
 			case 'image/gif':
 				$command = self::get_binary_path( 'gifsicle' );
 
-				exec( "{$command} -O2 '{$file}' > '{$file}' 2>&1", $result );
+				exec( "{$command} -O2 {$file} > {$file} 2>&1", $result );
 				break;
 			case 'image/svg+xml':
 				$sanitizer = new Sanitizer();
@@ -236,7 +236,7 @@ class ImageOptimizer {
 				$out     = self::get_filename_of_webp( $file );
 				$command = self::get_binary_path( 'cwebp' );
 
-				exec( "{$command} '{$file}' -o '{$out}' 2>&1", $result );
+				exec( "{$command} {$file} -o {$out} 2>&1", $result );
 				break;
 		}
 	}
@@ -287,7 +287,7 @@ class ImageOptimizer {
 				break;
 		}
 
-		$command = "{$this->command_dir}/{$os_dir}/{$bin}{$ext}";
+		$command = $this->command_dir . DIRECTORY_SEPARATOR . $os_dir . DIRECTORY_SEPARATOR . $bin . $ext;
 
 		if ( ! is_executable( "{$command}" ) ) {
 			chmod( "{$command}", 0755 );
@@ -317,7 +317,7 @@ class ImageOptimizer {
 	 * @return string
 	 */
 	private function _delete_trailing_slash( $str = '' ) {
-		return rtrim( $str, '/\\' );
+		return rtrim( $str, DIRECTORY_SEPARATOR );
 	}
 
 	/**
@@ -330,6 +330,6 @@ class ImageOptimizer {
 	private function _add_trailing_slash( $str = '' ) {
 		$str = self::_delete_trailing_slash( $str );
 
-		return "{$str}/";
+		return $str . DIRECTORY_SEPARATOR;
 	}
 }
