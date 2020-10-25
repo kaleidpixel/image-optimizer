@@ -103,3 +103,5 @@ jspm_packages/
 .sass-cache/
 cache/
 vendor/
+_test/images/*
+!_test/images/.gitkeep

@@ -2,7 +2,7 @@
     "name": "kaleidpixel/image-optimizer",
     "description": "Easily optimize images using PHP.",
     "license": "GPL-2.0+",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "homepage": "https://github.com/kaleidpixel/image-optimizer",
     "type": "library",
     "authors": [
@@ -17,9 +17,15 @@
         "kaleidpixel",
         "image-optimizer"
     ],
+    "scripts" :{
+        "test": [
+            "php ./_test/optimize.php"
+        ]
+    },
     "require": {
         "php": ">=5.6",
-        "enshrined/svg-sanitize": "0.*"
+        "enshrined/svg-sanitize": "0.*",
+        "guiguiboy/php-cli-progress-bar": "^0.0.4"
     },
     "autoload": {
         "psr-4": {
