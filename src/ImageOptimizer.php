@@ -6,7 +6,7 @@
  * @author     KUCKLU <hello@kuck1u.me>
  * @copyright  2018 Kaleid Pixel
  * @license    GNU General Public License v2.0 or later version
- * @version    0.1.4
+ * @version    0.1.9
  **/
 
 namespace KALEIDPIXEL\Module;
@@ -144,9 +144,9 @@ class ImageOptimizer {
 		foreach ( $images as $k => $v ) {
 			$progress->advance();
 
+			$this->optimize( $v );
 			$this->convert_to_webp( $v );
 			$this->convert_to_avif( $v );
-			$this->optimize( $v );
 			unset( $images[$k] );
 		}
 
@@ -228,9 +228,14 @@ class ImageOptimizer {
 	public function optimize( $file ) {
 		switch ( self::get_mime_type( $file ) ) {
 			case 'image/jpeg':
-				$command = self::get_binary_path( 'jpegtran' );
+				$command = self::get_binary_path( 'cjpeg' );
 
-				exec( "{$command} -progressive -copy none -optimize -outfile {$this->with( $this->escapepath( $file ) )} {$this->with( $this->escapepath( $file ) )} 2>&1", $result );
+				exec( "{$command} -quality 75 -optimize -outfile {$this->with( $this->escapepath( "$file-tmp" ) )} {$this->with( $this->escapepath( $file ) )} 2>&1", $result );
+
+				if ( file_exists( "$file-tmp" ) ) {
+					unlink( $file );
+					rename( "$file-tmp", $file );
+				}
 				break;
 			case 'image/png':
 				$pngquant = self::get_binary_path( 'pngquant' );
@@ -324,6 +329,19 @@ class ImageOptimizer {
 	public function get_binary_path( $bin ) {
 		$os_dir            = '';
 		$this->command_dir = self::_delete_trailing_slash( $this->command_dir );
+		$uname      = php_uname( 'm' );
+
+		switch ( PHP_OS ) {
+			case 'Darwin':
+			case 'FreeBSD':
+			case 'Linux':
+				if ( $uname === 'x86_64' && $bin === 'cjpeg' ) {
+					$bin = 'amd64' . DIRECTORY_SEPARATOR . $bin;
+				} elseif ( $uname === 'aarch64' && $bin === 'cjpeg' ) {
+					$bin = 'arm64' . DIRECTORY_SEPARATOR . $bin;
+				}
+				break;
+		}
 
 		switch ( PHP_OS ) {
 			case 'WINNT':
