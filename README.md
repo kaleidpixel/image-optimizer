@@ -15,3 +15,5 @@ Either require kaleidpixel/ImageOptimizer through composer or download the repo 
   https://github.com/kornelski/pngquant/blob/master/COPYRIGHT
 * svg-sanitizer: GPL version 2 License  
   https://github.com/darylldoyle/svg-sanitizer/blob/master/LICENSE
+* cavif: BSD 3-Clause License  
+  https://github.com/kornelski/cavif-rs/blob/main/LICENSE

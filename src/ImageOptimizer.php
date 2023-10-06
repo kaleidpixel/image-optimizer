@@ -15,6 +15,7 @@ if ( realpath( $_SERVER['SCRIPT_FILENAME'] ) === realpath( __FILE__ ) ) {
 	exit;
 }
 
+use ProgressBar\Manager;
 use enshrined\svgSanitize\Sanitizer;
 
 /**
@@ -39,6 +40,11 @@ class ImageOptimizer {
 	public $command_dir = './bin';
 
 	/**
+	 * @var string
+	 */
+	private $with = 'with';
+
+	/**
 	 * Instance.
 	 *
 	 * @return self
@@ -46,11 +52,11 @@ class ImageOptimizer {
 	public static function get_instance() {
 		$class = get_called_class();
 
-		if ( ! isset( self::$instance[ $class ] ) ) {
-			self::$instance[ $class ] = new $class();
+		if ( !isset( self::$instance[$class] ) ) {
+			self::$instance[$class] = new $class();
 		}
 
-		return self::$instance[ $class ];
+		return self::$instance[$class];
 	}
 
 	/**
@@ -76,26 +82,37 @@ class ImageOptimizer {
 	 * @return string
 	 */
 	public function get_mime_type( $path ) {
-		set_time_limit( 0 );
-
 		return mime_content_type( $path );
 	}
 
+	public function escapepath( $path ) {
+		return escapeshellarg( $path );
+	}
+
+	public function with( $v ) {
+		return $v;
+	}
+
 	/**
-	 * Is CLI
+	 * Check if the type of interface between the web server and PHP is CLI.
 	 *
 	 * @return bool
 	 */
-	public function is_cli() {
-		return PHP_SAPI === 'cli';
+	public static function is_cli() {
+		return (
+			defined( 'STDIN' ) ||
+			PHP_SAPI === 'cli' ||
+			( stristr( PHP_SAPI, 'cgi' ) && getenv( 'TERM' ) ) ||
+			array_key_exists( 'SHELL', $_ENV ) ||
+			( empty( $_SERVER['REMOTE_ADDR'] ) && !isset( $_SERVER['HTTP_USER_AGENT'] ) && count( $_SERVER['argv'] ) > 0 ) ||
+			!array_key_exists( 'REQUEST_METHOD', $_SERVER )
+		);
 	}
 
 	/**
 	 * Optimize all images.
 	 */
 	public function doing( $mode = '' ) {
-		set_time_limit( 0 );
-
 		switch ( $mode ) {
 			case 'iterator':
 			default:
@@ -106,13 +123,35 @@ class ImageOptimizer {
 				break;
 		}
 
-		if ( is_array( $images ) && ! empty( $images ) ) {
-			foreach ( $images as $k => $v ) {
-				$this->optimize( $v );
-				$this->convert_to_webp( $v );
-				unset( $images[ $k ] );
-			}
+		switch ( true ) {
+			case $images === false:
+				$error = 'The directory could not found. Please make sure that the directory exists.';
+				break;
+			case is_array( $images ) && empty( $images ):
+				$error = 'Image files (jpeg, png, gif, svg) could not found.';
+				break;
 		}
+
+		if ( !empty( $error ) ) {
+			echo "Error: {$error}" . PHP_EOL;
+
+			unset( $error );
+			exit( 1 );
+		}
+
+		$progress = new Manager( 0, ( $images !== false ) ? count( $images ) : 0 );
+
+		foreach ( $images as $k => $v ) {
+			$progress->advance();
+
+			$this->convert_to_webp( $v );
+			$this->convert_to_avif( $v );
+			$this->optimize( $v );
+			unset( $images[$k] );
+		}
+
+		echo 'Complete!' . PHP_EOL;
+		exit( 0 );
 	}
 
 	/**
@@ -121,26 +160,24 @@ class ImageOptimizer {
 	 * @return bool|array
 	 */
 	public function get_file_list() {
-		set_time_limit( 0 );
-
 		$this->image_dir = self::_add_trailing_slash( $this->image_dir );
 
 		if ( is_dir( $this->image_dir ) ) {
-            $result   = array();
+			$result   = array();
 			$iterator = new \RecursiveDirectoryIterator( $this->image_dir, \FileSystemIterator::SKIP_DOTS );
 			$iterator = new \RecursiveIteratorIterator( $iterator );
 			$iterator = new \RegexIterator( $iterator, '/^.+\.(jpe?g|png|gif|svg)$/i', \RecursiveRegexIterator::MATCH );
 
 			foreach ( $iterator as $info ) {
-			    if ( $info->isFile() ) {
-                    $result[] = $info->getPathname();
-                }
+				if ( $info->isFile() ) {
+					$result[] = $info->getPathname();
+				}
 			}
 
 			unset( $iterator );
 		} else {
-            $result = false;
-        }
+			$result = false;
+		}
 
 		return $result;
 	}
@@ -153,14 +190,12 @@ class ImageOptimizer {
 	 * @return array
 	 */
 	public function get_file_list_in_glob( $dir = '' ) {
-		set_time_limit( 0 );
-
 		$result = array();
 		$dir    = ( empty( $dir ) ) ? $this->image_dir : $dir;
 		$dir    = self::_delete_trailing_slash( $dir );
 
 		if ( is_dir( $dir ) ) {
-			$files = glob(  $dir . DIRECTORY_SEPARATOR . "*", GLOB_BRACE );
+			$files = glob( $dir . DIRECTORY_SEPARATOR . "*", GLOB_BRACE );
 
 			foreach ( $files as $v ) {
 				if ( is_file( $v ) ) {
@@ -191,23 +226,23 @@ class ImageOptimizer {
 	 * @param string $file
 	 */
 	public function optimize( $file ) {
-		set_time_limit( 0 );
-
 		switch ( self::get_mime_type( $file ) ) {
 			case 'image/jpeg':
 				$command = self::get_binary_path( 'jpegtran' );
 
-				exec( "{$command} -progressive -copy none -optimize -outfile {$file} {$file} 2>&1", $result );
+				exec( "{$command} -progressive -copy none -optimize -outfile {$this->with( $this->escapepath( $file ) )} {$this->with( $this->escapepath( $file ) )} 2>&1", $result );
 				break;
 			case 'image/png':
-				$command = self::get_binary_path( 'pngquant' );
+				$pngquant = self::get_binary_path( 'pngquant' );
+				$oxipng   = self::get_binary_path( 'oxipng' );
 
-				exec( "{$command} --force --output {$file} {$file} 2>&1", $result );
+				exec( "{$pngquant} --quality 0-100 --verbose 256 --floyd=1 --speed 1 --force --output={$this->with( $this->escapepath( $file ) )} {$this->with( $this->escapepath( $file ) )} 2>&1", $result );
+				exec( "{$oxipng} -o 4 -i 0 --strip all {$this->with( $this->escapepath( $file ) )} 2>&1", $result );
 				break;
 			case 'image/gif':
 				$command = self::get_binary_path( 'gifsicle' );
 
-				exec( "{$command} -O2 {$file} > {$file} 2>&1", $result );
+				exec( "{$command} -O2 {$this->with( $this->escapepath( $file ) )} > {$this->with( $this->escapepath( $file ) )} 2>&1", $result );
 				break;
 			case 'image/svg+xml':
 				$sanitizer = new Sanitizer();
@@ -232,30 +267,51 @@ class ImageOptimizer {
 	 * @param string $file
 	 */
 	public function convert_to_webp( $file ) {
-		set_time_limit( 0 );
-
 		switch ( self::get_mime_type( $file ) ) {
 			case 'image/jpeg':
 			case 'image/png':
-				$out     = self::get_filename_of_webp( $file );
+				$out     = self::get_filename( $file );
 				$command = self::get_binary_path( 'cwebp' );
 
-				exec( "{$command} {$file} -o {$out} 2>&1", $result );
+				exec( "{$command} {$this->with( $this->escapepath( $file ) )} -o {$this->with( $this->escapepath( $out ) )} 2>&1", $result );
 				break;
 		}
 	}
 
 	/**
-	 * Get the file name of webp.
+	 * Generate image in avif format.
 	 *
 	 * @param string $file
-	 *
-	 * @return mixed
 	 */
-	public function get_filename_of_webp( $file ) {
+	public function convert_to_avif( $file ) {
+		switch ( self::get_mime_type( $file ) ) {
+			case 'image/jpeg':
+			case 'image/png':
+				$command = self::get_binary_path( 'cavif' );
+
+				exec( "{$command} --quality 80 --depth=8 --overwrite --speed=4 {$this->with( $this->escapepath( $file ) )} 2>&1", $result );
+				break;
+		}
+	}
+
+	/**
+	 *  Get the file name of webp.
+	 *
+	 * @param $file
+	 * @param $type
+	 *
+	 * @return array|string|string[]
+	 */
+	public function get_filename( $file, $type = 'webp' ) {
 		$ext = pathinfo( $file, PATHINFO_EXTENSION );
 
-		return str_replace( ".{$ext}", '.webp', $file );
+		switch ( $type ) {
+			default:
+			case 'webp':
+				return str_replace( ".{$ext}", '.webp', $file );
+			case 'avif':
+				return str_replace( ".{$ext}", '.avif', $file );
+		}
 	}
 
 	/**
@@ -266,22 +322,16 @@ class ImageOptimizer {
 	 * @return string
 	 */
 	public function get_binary_path( $bin ) {
-		set_time_limit( 0 );
-
 		$os_dir            = '';
-		$ext               = '';
 		$this->command_dir = self::_delete_trailing_slash( $this->command_dir );
 
 		switch ( PHP_OS ) {
 			case 'WINNT':
 				$os_dir = 'win';
-				$ext    = '.exe';
+				$bin    = $bin . '.exe';
 				break;
 			case 'Darwin':
 				$os_dir = 'mac';
-				break;
-			case 'SunOS':
-				$os_dir = 'sol';
 				break;
 			case 'FreeBSD':
 				$os_dir = 'fbsd';
@@ -291,9 +341,9 @@ class ImageOptimizer {
 				break;
 		}
 
-		$command = $this->command_dir . DIRECTORY_SEPARATOR . $os_dir . DIRECTORY_SEPARATOR . $bin . $ext;
+		$command = $this->command_dir . DIRECTORY_SEPARATOR . $os_dir . DIRECTORY_SEPARATOR . $bin;
 
-		if ( ! is_executable( "{$command}" ) ) {
+		if ( !is_executable( "{$command}" ) ) {
 			chmod( "{$command}", 0755 );
 		}
 

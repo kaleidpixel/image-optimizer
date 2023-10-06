@@ -1,35 +1,36 @@
 {
-    "name": "kaleidpixel/image-optimizer",
-    "description": "Easily optimize images using PHP.",
-    "license": "MIT",
-    "version": "0.1.6",
-    "homepage": "https://github.com/kaleidpixel/image-optimizer",
-    "type": "library",
-    "authors": [
-        {
-            "name": "KUCKLU",
-            "email": "oss@kaleidpixel.jp",
-            "homepage": "https://www.kaleidpixel.jp",
-            "role": "Developer"
-        }
-    ],
-    "keywords": [
-        "kaleidpixel",
-        "image-optimizer"
-    ],
-    "scripts" :{
-        "test": [
-            "php ./_test/optimize.php"
-        ]
-    },
-    "require": {
-        "php": ">=5.6",
-        "enshrined/svg-sanitize": "0.*",
-        "guiguiboy/php-cli-progress-bar": "^0.0.4"
-    },
-    "autoload": {
-        "psr-4": {
-            "KALEIDPIXEL\\Module\\": "src"
-        }
+  "name": "kaleidpixel/image-optimizer",
+  "description": "Easily optimize images using PHP.",
+  "license": "MIT",
+  "version": "0.1.6",
+  "homepage": "https://github.com/kaleidpixel/image-optimizer",
+  "type": "library",
+  "authors": [
+    {
+      "name": "k4zuki02h4t4",
+      "email": "7222225+k4zuki02h4t4@users.noreply.github.com",
+      "homepage": "https://www.kaleidpixel.jp",
+      "role": "Developer"
     }
+  ],
+  "keywords": [
+    "kaleidpixel",
+    "image-optimizer"
+  ],
+  "scripts": {
+    "test": [
+      "php ./_test/optimize.php"
+    ]
+  },
+  "require": {
+    "php": ">=5.6",
+    "enshrined/svg-sanitize": "0.*",
+    "guiguiboy/php-cli-progress-bar": "^0.0.4",
+    "ext-fileinfo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "KALEIDPIXEL\\Module\\": "src"
+    }
+  }
 }
