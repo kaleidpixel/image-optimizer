@@ -329,7 +329,7 @@ class ImageOptimizer {
 	public function get_binary_path( $bin ) {
 		$os_dir            = '';
 		$this->command_dir = self::_delete_trailing_slash( $this->command_dir );
-		$uname      = php_uname( 'm' );
+		$uname             = php_uname( 'm' );
 
 		switch ( PHP_OS ) {
 			case 'Darwin':
