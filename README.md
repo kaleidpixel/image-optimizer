@@ -3,6 +3,9 @@
 ## Installation
 Either require kaleidpixel/ImageOptimizer through composer or download the repo and include the old way.
 
+## CLI Tool
+[kaleidpixel/imgopt](https://github.com/kaleidpixel/imgopt)
+
 ## License
 * Image Optimizer (This library): GPL version 2 License or later version
 * webp: BSD License  
