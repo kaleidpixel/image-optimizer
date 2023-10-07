@@ -6,7 +6,7 @@
  * @author     KUCKLU <hello@kuck1u.me>
  * @copyright  2018 Kaleid Pixel
  * @license    GNU General Public License v2.0 or later version
- * @version    0.2.0
+ * @version    0.3.0
  **/
 
 namespace KALEIDPIXEL\Module;
