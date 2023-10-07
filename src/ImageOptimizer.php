@@ -42,6 +42,11 @@ class ImageOptimizer {
 	/**
 	 * @var string
 	 */
+	public $phar_name = 'ImageOptimizer';
+
+	/**
+	 * @var string
+	 */
 	private $with = 'with';
 
 	/**
@@ -110,6 +115,47 @@ class ImageOptimizer {
 	}
 
 	/**
+	 * Check if the type of interface is PHAR.
+	 *
+	 * @return bool
+	 */
+	public static function is_phar() {
+		return !!\Phar::running( false );
+	}
+
+	/**
+	 * Delete the directory and all its contents.
+	 *
+	 * @param $path
+	 *
+	 * @return void
+	 */
+	public static function rmdirAll( $path ) {
+		if ( !file_exists( $path ) ) {
+			return;
+		}
+
+		if ( is_file( $path ) ) {
+			unlink( $path );
+
+			return;
+		}
+
+		if ( $handle = opendir( $path ) ) {
+			while ( false !== ( $item = readdir( $handle ) ) ) {
+				if ( $item === '.' || $item === '..' ) {
+					continue;
+				}
+
+				self::rmdirAll( $path . DIRECTORY_SEPARATOR . $item );
+			}
+
+			closedir( $handle );
+			rmdir( $path );
+		}
+	}
+
+	/**
 	 * Optimize all images.
 	 */
 	public function doing( $mode = '' ) {
@@ -142,12 +188,21 @@ class ImageOptimizer {
 		$progress = new Manager( 0, ( $images !== false ) ? count( $images ) : 0 );
 
 		foreach ( $images as $k => $v ) {
+			$progress->advance();
 			$this->optimize( $v );
 			$this->convert_to_webp( $v );
 			$this->convert_to_avif( $v );
 			unset( $images[$k] );
+		}
 
-			$progress->advance();
+		if ( $this->is_phar() === true ) {
+			$phar_bin = dirname( \Phar::running( false ) ) . DIRECTORY_SEPARATOR . '.' . $this->phar_name;
+
+			if ( is_dir( $phar_bin ) ) {
+				$this->rmdirAll( $phar_bin );
+			}
+
+			unset( $phar_bin );
 		}
 
 		echo 'Complete!' . PHP_EOL;
@@ -330,6 +385,7 @@ class ImageOptimizer {
 		$os_dir            = '';
 		$this->command_dir = self::_delete_trailing_slash( $this->command_dir );
 		$uname             = php_uname( 'm' );
+		$bin_name          = $bin;
 
 		switch ( PHP_OS ) {
 			case 'Darwin':
@@ -345,8 +401,9 @@ class ImageOptimizer {
 
 		switch ( PHP_OS ) {
 			case 'WINNT':
-				$os_dir = 'win';
-				$bin    = $bin . '.exe';
+				$os_dir   = 'win';
+				$bin      = $bin . '.exe';
+				$bin_name = $bin;
 				break;
 			case 'Darwin':
 				$os_dir = 'mac';
@@ -361,11 +418,25 @@ class ImageOptimizer {
 
 		$command = $this->command_dir . DIRECTORY_SEPARATOR . $os_dir . DIRECTORY_SEPARATOR . $bin;
 
-		if ( !is_executable( "{$command}" ) ) {
-			chmod( "{$command}", 0755 );
+		if ( $this->is_phar() === true ) {
+			$from     = $command;
+			$phar_bin = dirname( \Phar::running( false ) ) . DIRECTORY_SEPARATOR . '.' . $this->phar_name;
+			$command  = $phar_bin . DIRECTORY_SEPARATOR . $bin_name;
+
+			if ( !file_exists( $command ) ) {
+				if ( !is_dir( $this->_add_trailing_slash( $phar_bin ) ) ) {
+					mkdir( $this->_add_trailing_slash( $phar_bin ), 0755, true );
+				}
+
+				file_put_contents( $command, file_get_contents( $from ) );
+			}
 		}
 
-		return self::_sanitize_dir_name( $command );
+		if ( !is_executable( $command ) ) {
+			chmod( $command, 0755 );
+		}
+
+		return $this->_sanitize_dir_name( $command );
 	}
 
 	/**
