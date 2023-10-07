@@ -6,7 +6,7 @@
  * @author     KUCKLU <hello@kuck1u.me>
  * @copyright  2018 Kaleid Pixel
  * @license    GNU General Public License v2.0 or later version
- * @version    0.1.9
+ * @version    0.2.0
  **/
 
 namespace KALEIDPIXEL\Module;
@@ -142,12 +142,12 @@ class ImageOptimizer {
 		$progress = new Manager( 0, ( $images !== false ) ? count( $images ) : 0 );
 
 		foreach ( $images as $k => $v ) {
-			$progress->advance();
-
 			$this->optimize( $v );
 			$this->convert_to_webp( $v );
 			$this->convert_to_avif( $v );
 			unset( $images[$k] );
+
+			$progress->advance();
 		}
 
 		echo 'Complete!' . PHP_EOL;

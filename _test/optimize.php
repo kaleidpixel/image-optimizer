@@ -12,6 +12,3 @@ $optimizer->image_dir   = __DIR__ . DIRECTORY_SEPARATOR . 'images';
 $optimizer->command_dir = dirname( __DIR__ ) . DIRECTORY_SEPARATOR . 'bin';
 
 $optimizer->doing();
-
-echo 'Complete!' . PHP_EOL;
-exit( 0 );
