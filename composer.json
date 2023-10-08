@@ -2,7 +2,7 @@
   "name": "kaleidpixel/image-optimizer",
   "description": "Easily optimize images using PHP.",
   "license": "MIT",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "homepage": "https://github.com/kaleidpixel/image-optimizer",
   "type": "library",
   "authors": [

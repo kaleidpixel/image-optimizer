@@ -6,7 +6,7 @@
  * @author     KUCKLU <hello@kuck1u.me>
  * @copyright  2018 Kaleid Pixel
  * @license    GNU General Public License v2.0 or later version
- * @version    0.3.0
+ * @version    0.3.1
  **/
 
 namespace KALEIDPIXEL\Module;
@@ -393,7 +393,7 @@ class ImageOptimizer {
 			case 'Linux':
 				if ( $uname === 'x86_64' && $bin === 'cjpeg' ) {
 					$bin = 'amd64' . DIRECTORY_SEPARATOR . $bin;
-				} elseif ( $uname === 'aarch64' && $bin === 'cjpeg' ) {
+				} elseif ( ( $uname === 'aarch64' || $uname === 'arm64' ) && $bin === 'cjpeg' ) {
 					$bin = 'arm64' . DIRECTORY_SEPARATOR . $bin;
 				}
 				break;
