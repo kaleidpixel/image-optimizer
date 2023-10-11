@@ -6,7 +6,7 @@
  * @author     KUCKLU <hello@kuck1u.me>
  * @copyright  2018 Kaleid Pixel
  * @license    GNU General Public License v2.0 or later version
- * @version    0.3.1
+ * @version    0.3.2
  **/
 
 namespace KALEIDPIXEL\Module;
@@ -387,16 +387,17 @@ class ImageOptimizer {
 		$uname             = php_uname( 'm' );
 		$bin_name          = $bin;
 
-		switch ( PHP_OS ) {
-			case 'Darwin':
-			case 'FreeBSD':
-			case 'Linux':
-				if ( $uname === 'x86_64' && $bin === 'cjpeg' ) {
-					$bin = 'amd64' . DIRECTORY_SEPARATOR . $bin;
-				} elseif ( ( $uname === 'aarch64' || $uname === 'arm64' ) && $bin === 'cjpeg' ) {
-					$bin = 'arm64' . DIRECTORY_SEPARATOR . $bin;
-				}
-				break;
+		if ( in_array( $bin, [ 'cjpeg', 'oxipng' ] ) ) {
+			switch ( PHP_OS ) {
+				case 'Darwin':
+				case 'FreeBSD':
+				case 'Linux':
+					$architecture = in_array( $uname, [ 'aarch64', 'arm64' ] ) ? 'arm64' : 'amd64';
+					$bin          = $architecture . DIRECTORY_SEPARATOR . $bin;
+
+					unset( $architecture );
+					break;
+			}
 		}
 
 		switch ( PHP_OS ) {

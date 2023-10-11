@@ -7,7 +7,8 @@ Either require kaleidpixel/ImageOptimizer through composer or download the repo 
 [kaleidpixel/imgopt](https://github.com/kaleidpixel/imgopt)
 
 ## License
-* Image Optimizer (This library): GPL version 2 License or later version
+* Image Optimizer (This library): MIT License
+  https://github.com/kaleidpixel/image-optimizer/blob/master/LICENSE
 * webp: BSD License  
   https://www.webmproject.org/license/software/
 * gifsicle: GPL version 2 License  
@@ -16,6 +17,8 @@ Either require kaleidpixel/ImageOptimizer through composer or download the repo 
   https://github.com/imagemin/jpegtran-bin/blob/master/license
 * pngquant: GPL version 3 License  
   https://github.com/kornelski/pngquant/blob/master/COPYRIGHT
+* oxipng: MIT License  
+  https://github.com/shssoichiro/oxipng/blob/master/LICENSE
 * svg-sanitizer: GPL version 2 License  
   https://github.com/darylldoyle/svg-sanitizer/blob/master/LICENSE
 * cavif: BSD 3-Clause License  
